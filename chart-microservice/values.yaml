@@ -1,17 +1,13 @@
-
 minReadySeconds: 5
 progressDeadlineSeconds: 600
 replicaCount: 1
 revisionHistoryLimit: 10
-
-
 
 updateStrategy: 
   type: RollingUpdate
   rollingUpdate:
     maxSurge: 20%
     maxUnavailable: 5%
-
   
 resources:
   limits:
@@ -29,7 +25,6 @@ image:
    repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/tavola
    tag: fix_kz14992
    imagePullPolicy: Always
-
 
 livenessProbe:
   enabled: true
@@ -59,7 +54,6 @@ nodeSelector:
 customnodeSelector:
   ng: general
 
-
 lifecycle:
   enabled: false
   preStop:
@@ -85,3 +79,9 @@ service:
   type: ClusterIP  
   clusterIP: 
   sessionAffinity: None
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 50
