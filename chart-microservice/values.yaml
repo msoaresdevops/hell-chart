@@ -1,0 +1,87 @@
+
+minReadySeconds: 5
+progressDeadlineSeconds: 600
+replicaCount: 1
+revisionHistoryLimit: 10
+
+
+
+updateStrategy: 
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 20%
+    maxUnavailable: 5%
+
+  
+resources:
+  limits:
+    cpu: 4
+    memory: 5Gi
+  requests:
+    cpu: 600m
+    memory: 3Gi
+
+containersCommand:
+- command:
+    - bin/sidekiq
+
+image:
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/tavola
+   tag: fix_kz14992
+   imagePullPolicy: Always
+
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: "/"
+    port: 7433
+    scheme: HTTP
+  initialDelaySeconds: 30
+  periodSeconds: 5
+  successThreshold: 1
+  timeoutSeconds: 5
+  failureThreshold: 3   
+
+readinessProbe:
+  enabled: true
+  failureThreshold: 3
+  initialDelaySeconds: 30
+  periodSeconds: 5
+  successThreshold: 1
+  timeoutSeconds: 5
+
+nodeSelector:
+  enabled: false
+  ng: general
+  vmtype: application
+
+customnodeSelector:
+  ng: general
+
+
+lifecycle:
+  enabled: false
+  preStop:
+    exec:
+      command:
+        - kube/sidekiq_quiet
+
+volumeMounts: 
+- mountPath: "/tavola/config/pix"
+  name: pix-volume
+
+volumes: 
+- name: pix-volume
+  secret:
+    defaultMode: 420
+    secretName: pix
+
+service:
+  ports:
+    http: 80
+    https: 443
+  targerPort: 8080
+  type: ClusterIP  
+  clusterIP: 
+  sessionAffinity: None

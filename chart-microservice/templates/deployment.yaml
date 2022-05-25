@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    {{- template "labels" . }}   
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  {{- if .Values.minReadySeconds }}
+  minReadySeconds: {{ .Values.minReadySeconds }}
+  {{- end }}
+  {{- if .Values.progressDeadlineSeconds }}
+  progressDeadlineSeconds: {{ .Values.progressDeadlineSeconds }}
+  {{- end }}
+  replicas: {{ .Values.replicaCount }}
+  {{- if .Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- end }} 
+  selector:
+    matchLabels:      
+      {{- include "labels" . | indent 2 }}
+  {{- if .Values.updateStrategy }}
+  strategy: {{- toYaml .Values.updateStrategy | nindent 4 }}
+  {{- end}}  
+  template:
+    metadata:
+      labels:
+        {{- include "labels" . | indent 4 }}
+      name: {{ .Release.Name }}
+    spec:      
+      containers:
+      {{- if .Values.containersCommand }}
+      {{- toYaml .Values.containersCommand | nindent 6 }}
+      {{- end}}
+        envFrom:
+        - configMapRef:
+            name: env-{{ .Release.Name }}
+        - secretRef:
+            name: {{ .Release.Name }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+        {{- if .Values.lifecycle.enabled }}
+        lifecycle: {{- include "common.tplvalues.render" (dict "value" (omit .Values.lifecycle "enabled") "context" $) | nindent 10}}
+        {{- end }}
+        {{- if .Values.livenessProbe.enabled }}
+        livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.livenessProbe "enabled") "context" $) | nindent 10}}
+        {{- end }}          
+        name: {{ .Release.Name }}
+        {{- if .Values.readinessProbe.enabled }}
+        readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.readinessProbe "enabled") "context" $) | nindent 10 }}
+        {{- end }}      
+        resources:
+        {{- with .Values.resources }}
+          {{- with .limits}}
+          limits:
+            cpu: {{ .cpu }}
+            memory: {{ .memory }}
+          {{- end }}
+          {{- with .requests}}  
+          requests:
+            cpu: {{ .cpu }}
+            memory: {{ .memory }}
+          {{- end }}  
+        {{- end }}    
+        {{- if .Values.volumeMounts }}
+        volumeMounts: {{- toYaml .Values.volumeMounts | nindent 8 }}
+        {{- end}}
+      {{- if .Values.nodeSelector.enabled }}
+      nodeSelector: {{- include "common.tplvalues.render" (dict "value" (omit .Values.nodeSelector "enabled") "context" $) | nindent 8 }}
+      {{- else if .Values.customnodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.customnodeSelector "context" $) | nindent 8 }} 
+      {{- end}}  
+      {{- if .Values.volumes }}
+      volumes: {{- toYaml .Values.volumes | nindent 6 }} 
+      {{- end}}
