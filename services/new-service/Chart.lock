@@ -1,0 +1,6 @@
+dependencies:
+- name: tavola-helm-chart
+  repository: file://../../chart-microservice/tavola-helm-chart
+  version: 0.1.0
+digest: sha256:d3df9e74163015cace60db2b08f5739216af59526f965536703fd89240e771c1
+generated: "2022-05-30T15:45:14.9874322-03:00"
