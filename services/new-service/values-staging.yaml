@@ -1,87 +1,61 @@
-minReadySeconds: 5
-progressDeadlineSeconds: 600
-replicaCount: 1
-revisionHistoryLimit: 10
+tavola-helm-chart:
+  minReadySeconds: 5
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10    
 
-updateStrategy: 
-  type: RollingUpdate
-  rollingUpdate:
-    maxSurge: 20%
-    maxUnavailable: 5%
-  
-resources:
-  limits:
-    cpu: 4
-    memory: 5Gi
-  requests:
-    cpu: 600m
-    memory: 3Gi
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
 
-containersCommand:
-- command:
-    - bin/sidekiq
-
-image:
-   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/tavola
-   tag: fix_kz14992
+  containersCommand:
+  - command:
+      - bundle
+      - exec
+      - puma
+      - -C
+      - config/puma.rb
+  image:
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/pdf2png-server
+   tag: main
    imagePullPolicy: Always
 
-livenessProbe:
-  enabled: true
-  httpGet:
-    path: "/"
-    port: 7433
-    scheme: HTTP
-  initialDelaySeconds: 30
-  periodSeconds: 5
-  successThreshold: 1
-  timeoutSeconds: 5
-  failureThreshold: 3   
+  livenessProbe:
+    httpGet:
+      path: "/healthcheck"
+      port: 3000
+      scheme: HTTP
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 10
+    failureThreshold: 3
 
-readinessProbe:
-  enabled: true
-  failureThreshold: 3
-  initialDelaySeconds: 30
-  periodSeconds: 5
-  successThreshold: 1
-  timeoutSeconds: 5
+  readinessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /healthcheck
+      port: 3000
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
 
-nodeSelector:
-  enabled: false
-  ng: general
-  vmtype: application
+  resources:
+    limits:
+      cpu: "8"
+      memory: 4Gi
+    requests:
+      cpu: "4"
+      memory: 2560Mi
 
-customnodeSelector:
-  ng: general
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
 
-lifecycle:
-  enabled: false
-  preStop:
-    exec:
-      command:
-        - kube/sidekiq_quiet
-
-volumeMounts: 
-- mountPath: "/tavola/config/pix"
-  name: pix-volume
-
-volumes: 
-- name: pix-volume
-  secret:
-    defaultMode: 420
-    secretName: pix
-
-service:
-  ports:
-    http: 80
-    https: 443
-  targerPort: 8080
-  type: ClusterIP  
-  clusterIP: 
-  sessionAffinity: None
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 3
-  targetCPUUtilizationPercentage: 50
+  volumeMounts: {}
+  volumes: {}

@@ -35,8 +35,10 @@ spec:
         envFrom:
         - configMapRef:
             name: env-{{ .Release.Name }}
+        {{- if .Values.secretRef.enabled }}
         - secretRef:
             name: {{ .Release.Name }}
+        {{- end }}
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.imagePullPolicy }}
         {{- if .Values.lifecycle.enabled }}
@@ -46,6 +48,9 @@ spec:
         livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.livenessProbe "enabled") "context" $) | nindent 10}}
         {{- end }}          
         name: {{ .Release.Name }}
+        ports:
+        - containerPort: {{ .Values.containerPort }}
+          protocol: {{ .Values.protocol }}
         {{- if .Values.readinessProbe.enabled }}
         readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.readinessProbe "enabled") "context" $) | nindent 10 }}
         {{- end }}      
