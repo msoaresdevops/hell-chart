@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  main-chart:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2022-06-20T16:40:57.133885868-03:00"
+    description: A Helm chart for Kubernetes
+    digest: a25d36bd7ccf7bd60c9b54da6ccc11bcbd0eb2d2e78b3793ac4684c588c153ec
+    name: tavola-helm-chart
+    type: application
+    urls:
+    - https://msoaresdevops.github.io/hell-chart/tavola-helm-chart-0.1.0.tgz
+    version: 0.1.0
+generated: "2022-06-21T08:32:43.56538665-03:00"

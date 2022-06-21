@@ -1,0 +1,77 @@
+tavola-helm-chart:
+  setLabels:
+    labels: signer-validator-service  
+  
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10    
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 0
+    type: RollingUpdate
+
+  containersCommand: []
+
+  configMapRef:
+    name: env-signer-validator-service
+  
+  secretRef:
+    name: signer-validator-service
+
+  containerPorts:
+    - containerPort: 3000
+      protocol: TCP
+  
+  image:
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/signer-validator-service
+   tag: main
+   imagePullPolicy: Always
+
+  livenessProbe:
+    httpGet:
+      path: /healthcheck
+      port: 3000
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /healthcheck
+      port: 3000
+      scheme: HTTP
+    failureThreshold: 3  
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+    
+  resources:
+    limits:
+      cpu: "1"
+      memory: 2560Mi
+    requests:
+      cpu: 500m
+      memory: 2Gi
+
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
+
+  volumeMounts: {}
+  
+  volumes: {}  
+
+  service:
+    enabled: true
+    ports:
+      http: 80
+    targerPort: 3000
+    type: ClusterIP  
+    sessionAffinity: None

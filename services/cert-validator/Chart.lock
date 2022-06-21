@@ -1,0 +1,6 @@
+dependencies:
+- name: main-chart
+  repository: file://../../charts/tavola-helm-chart
+  version: 0.1.0
+digest: sha256:a0edf5f12899451465c5929eba6a66274f4f92e7926b2be2e3329f3504571d59
+generated: "2022-06-10T17:58:58.520928348-03:00"

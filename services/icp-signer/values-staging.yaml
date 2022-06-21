@@ -1,0 +1,79 @@
+tavola-helm-chart:
+  minReadySeconds: 5
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10    
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+
+  containersCommand:
+  - command:
+      - bundle
+      - exec
+      - rackup
+  
+  secretRef:
+    enabled: true
+
+  containerPort: 9292
+  protocol: "TCP"
+  
+  image:
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/icp-signer
+   tag: main
+   imagePullPolicy: Always
+
+  livenessProbe:
+    exec:
+      command:
+      - /bin/sh
+      - -c
+      - ps aux | grep [p]uma
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 10
+    failureThreshold: 3
+
+  readinessProbe:
+    exec:
+      command:
+      - /bin/sh
+      - -c
+      - ps aux | grep [p]uma
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  resources:
+    limits:
+      cpu: 1500m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 500Mi
+
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
+
+  volumeMounts: {}
+  volumes:
+  - configMap:
+      defaultMode: 420
+      name: certificate-p12
+    name: certificate-volume
+
+  service:
+    enabled: true
+    ports:
+      http: 80
+    targerPort: 9292
+    type: ClusterIP  
+    sessionAffinity: None

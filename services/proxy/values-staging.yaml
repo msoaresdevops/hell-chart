@@ -1,0 +1,80 @@
+tavola-helm-chart:
+  setLabels:
+    labels: proxy 
+
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10    
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+
+  containersCommand: []
+
+  containerName: proxy
+     
+  configMapRef:
+    enabled: false
+
+  secretRef:
+    enabled: false
+
+  containerPorts:
+  - containerPort: 80
+    protocol: TCP
+  
+  image:
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/proxy
+   tag: latest
+   imagePullPolicy: Always
+
+  livenessProbe:
+    httpGet:
+      path: /healthcheck
+      port: 80
+      scheme: HTTP
+    failureThreshold: 3
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  readinessProbe:
+    httpGet:
+      path: /healthcheck
+      port: 80
+      scheme: HTTP
+    failureThreshold: 3
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+    
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1000Mi
+    requests:
+      cpu: 100m
+      memory: 250Mi
+
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
+
+  volumeMounts: {}
+  volumes: {}
+
+  service:
+    enabled: true
+    name: proxy
+    ports:
+      http: 80 
+    targerPort: 80
+    nodePorts: 
+    type: NodePort  
+    sessionAffinity: None

@@ -1,0 +1,89 @@
+tavola-helm-chart:
+  setLabels:
+    labels: tavola-unicorn  
+
+  minReadySeconds: 5
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10    
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+
+  containersCommand:
+    command:
+      - bin/sidekiq
+
+  configMapRef:
+    name: env-tavola
+  
+  secretRef:
+    name: tavola
+
+  containerPorts: []
+
+  containerName: sidekiq
+
+  image:
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/tavola
+   tag: main
+   imagePullPolicy: Always
+
+  lifecycle:
+    enabled: true
+    preStop:
+      exec:
+        command:
+        - kube/sidekiq_quiet 
+
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /
+      port: 7433
+      scheme: HTTP
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /
+      port: 7433
+      scheme: HTTP
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  resources:
+    limits:
+      cpu: "4"
+      memory: 8Gi
+    requests:
+      cpu: 500m
+      memory: 2Gi
+
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
+
+  volumeMounts:
+  - mountPath: /tavola/config/pix
+    name: pix-volume
+
+  volumes:
+  - name: pix-volume
+    secret:
+      defaultMode: 420
+      secretName: pix
+
+  service:
+    enabled: false
+

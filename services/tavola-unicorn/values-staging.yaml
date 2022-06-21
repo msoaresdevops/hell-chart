@@ -1,0 +1,95 @@
+tavola-helm-chart:
+  setLabels:
+    labels: tavola-unicorn  
+
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10    
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+
+  containersCommand: []
+
+  containerName: unicorn
+
+  configMapRef:
+    name: env-tavola
+  
+  secretRef:
+    name: tavola
+
+  containerPorts:
+    - containerPort: 8080
+      protocol: TCP
+  image:
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/tavola
+   tag: main
+   imagePullPolicy: Always
+
+  lifecycle:
+    enabled: true
+    preStop:
+      exec:
+        command:
+        - sh
+        - -c
+        - sleep 15 
+
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /healthcheck
+      port: 8080
+      scheme: HTTP
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /healthcheck
+      port: 8080
+      scheme: HTTP
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  resources:
+    limits:
+      cpu: "3"
+      memory: 5Gi
+    requests:
+      cpu: 500m
+      memory: 2560Mi
+
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
+
+  volumeMounts:
+  - mountPath: /tavola/config/pix
+    name: pix-volume
+
+  volumes:
+  - name: pix-volume
+    secret:
+      defaultMode: 420
+      secretName: pix
+
+  service:
+    enabled: true
+    name: unicorn
+    ports:
+      http: 80
+      targetPort: 8080
+    type: ClusterIP
+    sessionAffinity: None    
+

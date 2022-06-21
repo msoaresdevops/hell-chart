@@ -1,0 +1,235 @@
+NAME: proxy
+LAST DEPLOYED: Wed Jun  8 16:50:18 2022
+NAMESPACE: helm
+STATUS: pending-install
+REVISION: 1
+TEST SUITE: None
+USER-SUPPLIED VALUES:
+tavola-helm-chart:
+  configMapRef:
+    enabled: false
+  containerPorts:
+  - containerPort: 80
+    protocol: TCP
+  containersCommand: []
+  image:
+    imagePullPolicy: Always
+    repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/proxy
+    tag: latest
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /healthcheck
+      port: 80
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
+  progressDeadlineSeconds: 600
+  readinessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /healthcheck
+      port: 80
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+  replicas: 2
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1000Mi
+    requests:
+      cpu: 100m
+      memory: 250Mi
+  revisionHistoryLimit: 10
+  secretRef:
+    enabled: false
+  service:
+    enabled: true
+    nodePorts: null
+    ports:
+      http: 80
+    sessionAffinity: None
+    targerPort: 80
+    type: NodePort
+  setLabels:
+    labels: proxy
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+  volumeMounts: {}
+  volumes: {}
+
+COMPUTED VALUES:
+tavola-helm-chart:
+  autoscaling:
+    enabled: false
+  configMapRef:
+    enabled: false
+  containerPorts:
+  - containerPort: 80
+    protocol: TCP
+  containersCommand: []
+  customnodeSelector: {}
+  global: {}
+  image:
+    imagePullPolicy: Always
+    repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/proxy
+    tag: latest
+  lifecycle:
+    enabled: false
+  livenessProbe:
+    enabled: true
+    failureThreshold: 3
+    httpGet:
+      path: /healthcheck
+      port: 80
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+  minReadySeconds: ""
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
+  progressDeadlineSeconds: 600
+  readinessProbe:
+    enabled: true
+    failureThreshold: 3
+    httpGet:
+      path: /healthcheck
+      port: 80
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+  replicaCount: ""
+  replicas: 2
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1000Mi
+    requests:
+      cpu: 100m
+      memory: 250Mi
+  revisionHistoryLimit: 10
+  secretRef:
+    enabled: false
+  service:
+    enabled: true
+    nodePorts: null
+    ports:
+      http: 80
+    sessionAffinity: None
+    targerPort: 80
+    type: NodePort
+  setLabels:
+    labels: proxy
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+  volumeMounts: {}
+  volumes: {}
+
+HOOKS:
+MANIFEST:
+---
+# Source: proxy/charts/tavola-helm-chart/templates/svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: proxy 
+  name: proxy
+  namespace: helm
+spec:
+  type: NodePort
+  externalTrafficPolicy: 
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    run: proxy
+  sessionAffinity: None
+---
+# Source: proxy/charts/tavola-helm-chart/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: proxy   
+  name: proxy
+  namespace: helm
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 
+  revisionHistoryLimit: 10 
+  selector:
+    matchLabels:  
+      app: proxy
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate  
+  template:
+    metadata:
+      labels:    
+        app: proxy
+      name: proxy
+    spec:      
+      containers:
+      - name: proxy
+        image: 714177237676.dkr.ecr.us-east-1.amazonaws.com/proxy:latest
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1000Mi  
+          requests:
+            cpu: 100m
+            memory: 250Mi
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthcheck
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthcheck
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 5
+      nodeSelector:
+        ng: general
+        vmtype: application
+

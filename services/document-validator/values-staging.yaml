@@ -1,0 +1,67 @@
+tavola-helm-chart:
+  setLabels:
+    labels: document-validator
+
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10    
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+
+  containersCommand:
+    command:
+      - bundle
+      - exec
+      - puma
+      - -p
+      - "8080"     
+  
+  configMapRef:
+    name: env-document-validator
+  
+  secretRef:
+    name: document-validator
+
+  containerPorts:
+  - containerPort: 8080
+    protocol: TCP
+    
+  
+  image:
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/document-validator
+   tag: main
+   imagePullPolicy: Always
+
+  livenessProbe:
+    enabled: false
+
+  readinessProbe:
+    enabled: false
+
+  resources:
+    limits:
+      cpu: 50m
+      memory: 1Gi
+    requests:
+      cpu: 10m
+      memory: 500Mi
+
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
+
+  volumeMounts: {}
+  volumes: {}
+
+  service:
+    enabled: true
+    ports:
+      http: 80
+    targerPort: 8080
+    type: ClusterIP  
+    sessionAffinity: None

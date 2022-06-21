@@ -1,0 +1,73 @@
+
+tavola-helm-chart:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10    
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+
+  containersCommand:
+  - command:
+      - node
+      - build/app.js
+
+  secretRef:
+    enabled: true
+
+  containerPort: 3000
+  protocol: "TCP"
+  
+  image:
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/liveness-service
+   tag: main
+   imagePullPolicy: Always
+
+  livenessProbe:
+    httpGet:
+      path: /healthcheck
+      port: 3000
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /healthcheck
+      port: 3000
+      scheme: HTTP
+    failureThreshold: 3  
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+    
+  resources:
+    limits:
+      cpu: 100m
+      memory: 800Mi
+    requests:
+      cpu: 10m
+      memory: 250Mi
+
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
+
+  volumeMounts: {}
+  volumes: {}
+
+  service:
+    enabled: true
+    ports:
+      http: 80
+    targerPort: 3000
+    type: ClusterIP  
+    sessionAffinity: None

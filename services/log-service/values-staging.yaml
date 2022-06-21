@@ -1,0 +1,79 @@
+tavola-helm-chart:
+  minReadySeconds: 5
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10    
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+
+  containersCommand:
+  - command:
+      - bundle
+      - exec
+      - puma
+      - -p
+      - "7000"
+    
+  containerPort: 7000
+  protocol: "TCP"
+
+  secretRef:
+    enabled: true
+  
+  image:
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/log-service
+   tag: main
+   imagePullPolicy: Always
+
+  livenessProbe:
+    enabled: true
+    exec:
+      command:
+      - /bin/sh
+      - -c
+      - ps aux | grep [p]uma
+    failureThreshold: 3
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 10
+
+  readinessProbe:
+    exec:
+      command:
+      - /bin/sh
+      - -c
+      - ps aux | grep [p]uma
+    failureThreshold: 3
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  resources:
+    limits:
+      cpu: 1500m
+      memory: 4Gi
+    requests:
+      cpu: 300m
+      memory: 750Mi
+
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
+
+  volumeMounts: {}
+  volumes: {}
+
+  service:
+    enabled: true
+    ports:
+      http: 80
+    targerPort: 7000
+    type: ClusterIP  
+    sessionAffinity: None

@@ -1,0 +1,105 @@
+
+tavola-helm-chart:
+  minReadySeconds: 5
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10    
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+
+  containersCommand:
+  - command:
+      - /lacuna-service/docker/docker-entrypoint.sh
+
+  secretRef:
+    enabled: true
+
+  containerPort: 3000
+  protocol: "TCP"
+  
+  image:
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/lacuna-service
+   tag: main
+   imagePullPolicy: Always
+
+  livenessProbe:
+    httpGet:
+      path: /healthcheck
+      port: 3000
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /healthcheck
+      port: 3000
+      scheme: HTTP
+    failureThreshold: 3  
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+    
+  resources:
+    limits:
+      cpu: 1200m
+      memory: 600Mi
+    requests:
+      cpu: 800m
+      memory: 300Mi
+
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
+
+  volumeMounts:
+  - mountPath: /lacuna-service/pki-license
+    name: pki-license
+    readOnly: true
+  - mountPath: /lacuna-service/share-docs
+    name: lacuna-share-docs
+  - mountPath: /lacuna-service/certs/p12
+    name: lacuna-certificate-p12
+    readOnly: true
+  - mountPath: /lacuna-service/certs/pem
+    name: lacuna-certificate-pem
+    readOnly: true  
+  volumes:
+  - name: pki-license
+    secret:
+      defaultMode: 420
+      items:
+      - key: LacunaPkiLicense.config
+        path: LacunaPkiLicense.config
+      secretName: lacuna-pki-license
+  - name: lacuna-share-docs
+    persistentVolumeClaim:
+      claimName: lacuna-pvc
+  - configMap:
+      defaultMode: 420
+      name: lacuna-certificate-p12
+    name: lacuna-certificate-p12
+  - name: lacuna-certificate-pem
+    secret:
+      defaultMode: 420
+      items:
+      - key: certificate.pem
+        path: certificate.pem
+      secretName: lacuna-certificate-pem  
+
+  service:
+    enabled: true
+    ports:
+      http: 80
+    targerPort: 3000
+    type: ClusterIP  
+    sessionAffinity: None

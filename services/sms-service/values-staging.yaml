@@ -1,0 +1,55 @@
+tavola-helm-chart:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10    
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+
+  containersCommand:
+  - command:
+    - bundle
+    - exec
+    - bin/consume
+  
+  configMapRed:
+    enabled: true
+    
+  secretRef:
+    enabled: true
+
+  containerPorts:
+    enabled: false
+  
+  image:
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/sms-service
+   tag: main
+   imagePullPolicy: Always
+
+  livenessProbe:
+    enabled: false
+
+  readinessProbe:
+    enabled: false
+
+  resources:
+    limits:
+      cpu: 50m
+      memory: 400Mi
+    requests:
+      cpu: 10m
+      memory: 250Mi
+
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
+
+  volumeMounts: {}
+  volumes: {}
+
+  service:
+    enabled: false

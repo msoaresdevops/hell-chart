@@ -1,0 +1,73 @@
+tavola-helm-chart:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10    
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+
+  containersCommand:
+  - command:
+      - node
+      - build/server.js    
+  secretRef:
+    enabled: true
+
+  containerPort: 3000
+  protocol: "TCP"
+  
+  image:
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/merlin
+   tag: main
+   imagePullPolicy: Always
+
+  livenessProbe:
+    enabled: true
+    failureThreshold: 3
+    httpGet:
+      path: /healthcheck
+      port: 3000
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  readinessProbe:
+    enabled: true
+    failureThreshold: 3
+    httpGet:
+      path: /healthcheck
+      port: 3000
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 500Mi
+    requests:
+      cpu: 100m
+      memory: 500Mi
+
+  nodeSelector:
+    enabled: true
+    ng: general
+    vmtype: application
+
+  volumeMounts: {}
+  volumes: {}
+
+  service:
+    enabled: true
+    ports:
+      http: 80
+    targerPort: 3000
+    type: ClusterIP  
+    sessionAffinity: None
