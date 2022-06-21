@@ -23,7 +23,7 @@ containersCommand:
 
 image:
    repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/tavola
-   tag: fix_kz14992
+   tag: main
    imagePullPolicy: Always
 
 livenessProbe:
