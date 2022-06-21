@@ -20,7 +20,7 @@ spec:
     matchLabels:      
       {{- include "labels" . | indent 2 }}
   {{- if .Values.updateStrategy }}
-  strategy: {{- toYaml .Values.updateStrategy | nindent 4 }}
+  strategy: {{- toYaml .Values.updateStrategy | nindent 6 }}
   {{- end}}  
   template:
     metadata:
