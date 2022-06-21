@@ -30,14 +30,14 @@ spec:
     spec:      
       containers:
       {{- if .Values.containersCommand }}
-      {{- toYaml .Values.containersCommand | nindent 6 }}
+      {{- toYaml .Values.containersCommand | nindent 12 }}
       {{- end}}
         envFrom:
         - configMapRef:
             name: env-{{ .Release.Name }}
         - secretRef:
             name: {{ .Release.Name }}
-        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag | nindent 6 }}
         imagePullPolicy: {{ .Values.image.imagePullPolicy }}
         {{- if .Values.lifecycle.enabled }}
         lifecycle: {{- include "common.tplvalues.render" (dict "value" (omit .Values.lifecycle "enabled") "context" $) | nindent 10}}
