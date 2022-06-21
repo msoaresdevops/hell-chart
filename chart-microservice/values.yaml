@@ -22,7 +22,7 @@ containersCommand:
     - bin/sidekiq
 
 image:
-   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/icp-signer
+   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/tavola
    tag: main
    imagePullPolicy: Always
 
