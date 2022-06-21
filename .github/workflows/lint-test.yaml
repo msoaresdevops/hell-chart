@@ -14,7 +14,7 @@ jobs:
       - name: GitHub Action for Helm Templates Validation
         uses: igabaydulin/helm-check-action@0.1.4
         env:
-          CHART_LOCATION: ./hell-chart/charts/
-          CHART_VALUES: ./hell-chart/charts/values.yaml
+          CHART_LOCATION: ./charts/
+          CHART_VALUES: ./charts/values.yaml
 
 
