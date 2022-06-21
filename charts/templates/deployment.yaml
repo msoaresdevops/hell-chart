@@ -25,7 +25,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "labels" . | indent 4 }}
+        {{- include "labels" . | indent 12 }}
       name: {{ .Release.Name }}
     spec:      
       containers:
