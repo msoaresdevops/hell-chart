@@ -22,4 +22,4 @@ jobs:
         run: helm plugin install https://github.com/hypnoglow/helm-s3.git
       
       - name: Execute Helm Package
-        run: echo $HOME
+        run: helm package charts
