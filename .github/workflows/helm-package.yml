@@ -12,4 +12,5 @@ jobs:
     steps:
       - name: Package stable charts
         uses: flydiverny/helm-package-action@master
+        args: "./stable"
 
