@@ -15,9 +15,9 @@ jobs:
         uses: actions/checkout@v2
         
       - name: Configure AWS credentials from Production account
-        uses: aws-actions/configure-aws-credentials@master
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::865182863217:role/s3-helm-repo
+          role-to-assume: arn:aws:iam::865182863217:role/ADFS-Infra
           aws-region: sa-east-1
         
       - name: Set up Helm
