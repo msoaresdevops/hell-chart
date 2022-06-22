@@ -9,6 +9,9 @@ jobs:
   build:
     name: Helm Package
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     
     steps:
       - name: Checkout
@@ -17,7 +20,7 @@ jobs:
       - name: Configure AWS credentials from Production account
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::865182863217:role/ADFS-Infra
+          role-to-assume: arn:aws:iam::865182863217:role/s3-helm-repo
           aws-region: sa-east-1
         
       - name: Set up Helm
