@@ -9,9 +9,6 @@ jobs:
   build:
     name: Helm Package
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
     
     steps:
       - name: Checkout
@@ -20,7 +17,8 @@ jobs:
       - name: Configure AWS credentials from Production account
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::865182863217:role/s3-helm-repo
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: sa-east-1
         
       - name: Set up Helm
@@ -38,5 +36,7 @@ jobs:
         run: helm repo add main-chart s3://my-helm-repo-lab1/v1
       
       - name: S3 package push
-        run: helm s3 push tavola-helm-chart-0.1.0.tgz main-chart
+        run: |
+          file=$(ls | grep .tgz)
+          helm s3 push $file main-chart
       
