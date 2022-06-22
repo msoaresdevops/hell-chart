@@ -2,9 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    {{- template "labels" . }}   
+    {{- if eq .Values.labelType "run" }}
+    {{- template "labels-run" . }}
+    {{- else if eq .Values.labelType "app"}}
+    {{- template "labels-app" . }}
+    {{- end }}   
   name: {{ .Release.Name }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
 spec:
   {{- if .Values.minReadySeconds }}
   minReadySeconds: {{ .Values.minReadySeconds }}
@@ -17,38 +21,39 @@ spec:
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- end }} 
   selector:
-    matchLabels:      
-      {{- include "labels" . | indent 2 }}
+    matchLabels:
+      {{- if eq .Values.labelType "run" }}      
+      {{- include "labels-run" . | indent 2 }}
+      {{- else if eq .Values.labelType "app"}}
+      {{- include "labels-app" . | indent 2 }}
+      {{- end }} 
   {{- if .Values.updateStrategy }}
-  strategy: {{- toYaml .Values.updateStrategy | nindent 6 }}
+  strategy: {{- toYaml .Values.updateStrategy | nindent 4 }}
   {{- end}}  
   template:
     metadata:
       labels:
-        {{- include "labels" . | indent 12 }}
+        {{- if eq .Values.labelType "run" }}
+        {{- include "labels-run" . | indent 4 }}
+        {{- else if eq .Values.labelType "app"}}
+        {{- include "labels-app" . | indent 4 }}
+        {{- end }}
       name: {{ .Release.Name }}
     spec:      
       containers:
-      {{- if .Values.containersCommand }}
-      {{- toYaml .Values.containersCommand | nindent 12 }}
-      {{- end}}
-        envFrom:
-        - configMapRef:
-            name: env-{{ .Release.Name }}
-        - secretRef:
-            name: {{ .Release.Name }}
-        image: {{ .Values.image.repository }}:{{ .Values.image.tag | nindent 6 }}
+      - name: {{ .Values.containerName }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        {{- if .Values.containerPorts }}
+        ports:
+        {{- toYaml .Values.containerPorts | nindent 8 }}  
+        {{- end }}
         imagePullPolicy: {{ .Values.image.imagePullPolicy }}
         {{- if .Values.lifecycle.enabled }}
         lifecycle: {{- include "common.tplvalues.render" (dict "value" (omit .Values.lifecycle "enabled") "context" $) | nindent 10}}
         {{- end }}
-        {{- if .Values.livenessProbe.enabled }}
-        livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.livenessProbe "enabled") "context" $) | nindent 10}}
-        {{- end }}          
-        name: {{ .Release.Name }}
-        {{- if .Values.readinessProbe.enabled }}
-        readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.readinessProbe "enabled") "context" $) | nindent 10 }}
-        {{- end }}      
+        {{- if .Values.containersCommand }}
+        {{- toYaml .Values.containersCommand | nindent 8 }}
+        {{- end}}
         resources:
         {{- with .Values.resources }}
           {{- with .limits}}
@@ -62,6 +67,21 @@ spec:
             memory: {{ .memory }}
           {{- end }}  
         {{- end }}    
+        {{- if .Values.configMapRef.enabled }}
+        envFrom:
+        - configMapRef:
+            {{- include "common.tplvalues.render" (dict "value" (omit .Values.configMapRef "enabled") "context" $) | nindent 12 }}
+        {{- end }}    
+        {{- if .Values.secretRef.enabled }}
+        - secretRef:
+            {{- include "common.tplvalues.render" (dict "value" (omit .Values.secretRef "enabled") "context" $) | nindent 12 }}
+        {{- end }}        
+        {{- if .Values.livenessProbe.enabled }}
+        livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.livenessProbe "enabled") "context" $) | nindent 10}}
+        {{- end }}                                  
+        {{- if .Values.readinessProbe.enabled }}
+        readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.readinessProbe "enabled") "context" $) | nindent 10 }}
+        {{- end }}             
         {{- if .Values.volumeMounts }}
         volumeMounts: {{- toYaml .Values.volumeMounts | nindent 8 }}
         {{- end}}

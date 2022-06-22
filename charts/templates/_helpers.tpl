@@ -1,6 +1,9 @@
-{{- define "labels" }}
-    app: {{ .Release.Name }}
-    tier: queue
+{{- define "labels-run" }}
+    run: {{ .Values.setLabels.labels }}
+{{- end }}
+
+{{- define "labels-app" }}
+    app: {{ .Values.setLabels.labels }}
 {{- end }}
 
 Renders a value that contains template.

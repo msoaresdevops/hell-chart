@@ -1,88 +1,91 @@
-minReadySeconds: 5
-progressDeadlineSeconds: 600
-replicaCount: 1
-revisionHistoryLimit: 10
+setLabels:
+  labels: merlin
 
-updateStrategy: 
-  type: RollingUpdate
+labelType: run
+
+progressDeadlineSeconds: 600
+replicas: 1
+revisionHistoryLimit: 10    
+
+updateStrategy:
   rollingUpdate:
-    maxSurge: 20%
-    maxUnavailable: 5%
-  
-resources:
-  limits:
-    cpu: 4
-    memory: 5Gi
-  requests:
-    cpu: 600m
-    memory: 3Gi
+    maxSurge: 1
+    maxUnavailable: 1
+  type: RollingUpdate
 
 containersCommand:
-- command:
-    - bin/sidekiq
+  command:
+    - node
+    - build/server.js    
 
+containerName: merlin
+  
+configMapRef:
+  enabled: true
+  name: env-merlin
+  
+secretRef:
+  enabled: true
+  name: merlin
+
+containerPorts:
+- containerPort: 3000
+  protocol: "TCP"
+  
 image:
-   repository: 714177237676.dkr.ecr.us-east-1.amazonaws.com/log-service
-   tag: main
-   imagePullPolicy: Always
+  repository: clicksign/merlin
+  tag: v1.7.0
+  imagePullPolicy: Always
 
 livenessProbe:
-  enabled: true
+  failureThreshold: 3
   httpGet:
-    path: "/"
-    port: 7433
+    path: /healthcheck
+    port: 3000
     scheme: HTTP
-  initialDelaySeconds: 30
+  initialDelaySeconds: 5
   periodSeconds: 5
   successThreshold: 1
   timeoutSeconds: 5
-  failureThreshold: 3   
 
 readinessProbe:
-  enabled: true
   failureThreshold: 3
-  initialDelaySeconds: 30
+  httpGet:
+    path: /healthcheck
+    port: 3000
+    scheme: HTTP
+  initialDelaySeconds: 5
   periodSeconds: 5
   successThreshold: 1
   timeoutSeconds: 5
 
+resources:
+  limits:
+    cpu: 500m
+    memory: 500Mi
+  requests:
+    cpu: 100m
+    memory: 500Mi
+
 nodeSelector:
-  enabled: false
+  enabled: true
   ng: general
   vmtype: application
 
-customnodeSelector:
-  ng: general
-
-lifecycle:
-  enabled: false
-  preStop:
-    exec:
-      command:
-        - kube/sidekiq_quiet
-
-volumeMounts: 
-- mountPath: "/tavola/config/pix"
-  name: pix-volume
-
-volumes: 
-- name: pix-volume
-  secret:
-    defaultMode: 420
-    secretName: pix
+volumeMounts: {}
+volumes: {}
 
 service:
   enabled: true
+  name: merlin
   ports:
     http: 80
-    https: 443
-  targerPort: 8080
+  targerPort: 3000
   type: ClusterIP  
-  clusterIP: 
   sessionAffinity: None
 
 autoscaling:
   enabled: false
-  minReplicas: 1
-  maxReplicas: 3
-  targetCPUUtilizationPercentage: 50
+
+lifecycle:
+  enabled: false

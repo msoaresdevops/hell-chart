@@ -3,18 +3,36 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    {{- template "labels" . }} 
-  name: {{ .Release.Name }}
-  namespace: {{ .Release.Namespace }}
+    {{- if eq .Values.labelType "run" }}
+    {{- template "labels-run" . }}
+    {{- else if eq .Values.labelType "app"}}
+    {{- template "labels-app" . }}
+    {{- end }} 
+  name: {{ .Values.service.name }}
+  namespace: {{ .Release.Namespace | quote }}
 spec:
-  clusterIP: {{ .Values.service.clusterIP }}
-  ports:
-  - name: http
-    port: {{ .Values.service.ports.http }}
-    protocol: TCP
-    targetPort: {{ .Values.service.targerPort }}
-  selector:
-    run: {{ .Release.Name }}
-  sessionAffinity: {{ .Values.service.sessionAffinity }}
   type: {{ .Values.service.type }}
+  {{- if and .Values.service.clusterIP (eq .Values.service.type "ClusterIP") }}
+  clusterIP: {{ .Values.service.clusterIP }}
+  {{- end }}
+  {{- if (or (eq .Values.service.type "LoadBalancer") (eq .Values.service.type "NodePort")) }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy | quote }}
+  {{- end }}
+  ports:
+    - name: http
+      port: {{ .Values.service.ports.http }}
+      protocol: TCP
+      targetPort: {{ .Values.service.targerPort }}
+      {{- if (and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) (not (empty .Values.service.nodePorts))) }}
+      nodePort: {{ .Values.service.nodePorts }}
+      {{- else if eq .Values.service.type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
+  selector:
+    {{- if eq .Values.labelType "run" }}
+    {{- template "labels-run" . }}
+    {{- else if eq .Values.labelType "app"}}
+    {{- template "labels-app" . }}
+    {{- end }} 
+  sessionAffinity: {{ .Values.service.sessionAffinity }}  
 {{- end }}
