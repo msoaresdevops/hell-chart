@@ -13,5 +13,5 @@ jobs:
       - name: Package stable charts
         uses: flydiverny/helm-package-action@master
         with:
-          args: hell-chart/charts/
+          args: /charts/
 
