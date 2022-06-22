@@ -14,11 +14,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         
-      - name: AWS CLI
-        run: aws --version
-        
       - name: Configure AWS credentials from Production account
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@master
         with:
           role-to-assume: arn:aws:iam::865182863217:role/s3-helm-repo
           aws-region: sa-east-1
