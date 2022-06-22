@@ -14,5 +14,9 @@ jobs:
         uses: azure/setup-helm@v1
         with:
           version: v3.7.0
-      - name: Set up Helm
+      
+      - name: Set up Helm S3 Plugin
         run: helm plugin install https://github.com/hypnoglow/helm-s3.git
+      
+      - name: Execute Helm Package
+        run: helm package ./charts
