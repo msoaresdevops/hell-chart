@@ -1,0 +1,24 @@
+name: Helm Package and S3 Bucket Upload
+
+on:
+  push:
+    branches:
+      - main
+      - new-microservice
+jobs:
+  build:
+    name: Chart release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::865182863217:role/s3-helm-repo
+          aws-region: sa-east-1
+      - name: Helm release
+        uses: shellbear/helm-release-action@0.1
+        with:
+          repo: s3://my-helm-repo-lab1/v1/
+          chart: ./charts/
