@@ -38,11 +38,12 @@ jobs:
       - name: S3 package push
         run: |
           file=$(ls | grep .tgz)
+          tag=$(sed -n '/^version:/p' Chart.yaml)
           helm s3 push $file main-chart
       
       
       - uses: actions/checkout@v3
       - uses: rickstaa/action-create-tag@v1
         with:
-          tag: "latest"
+          tag: $tag
 
