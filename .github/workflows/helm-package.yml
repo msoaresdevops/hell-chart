@@ -43,5 +43,5 @@ jobs:
       
       - uses: rickstaa/action-create-tag@v1
         with:
-          tag: "$tag"
+          tag: $tag
 
