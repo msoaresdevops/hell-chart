@@ -41,13 +41,10 @@ jobs:
           helm s3 push $file main-chart
       
       - name: Define TAG
-        outputs:
-        tag-name: ${{ steps.tag.outputs.tag-name }}
         id: tag
-        run: echo "::set-output name=tag-name::$(tag=$(sed -n '/^version:/p' charts/Chart.yaml))"
+        run: echo "::set-output name=tag-name::$(tag=value)"
 
       - name: Get TAG Value
-        needs: tag
-        run: echo "${{ needs.tag.outputs.tag-name }}"
+        run: echo "${{ steps.tag.outputs.tag-name }}"
 
 
