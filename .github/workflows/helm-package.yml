@@ -42,7 +42,7 @@ jobs:
       
       - name: Define TAG
         id: tag
-        run: echo "::set-output name=tag-name::$(tag=value)"
+        run: echo "::set-output name=tag-name::$(ls -la)"
 
       - name: Get TAG Value
         run: echo "${{ steps.tag.outputs.tag-name }}"
