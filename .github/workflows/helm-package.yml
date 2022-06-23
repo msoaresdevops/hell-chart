@@ -44,8 +44,7 @@ jobs:
         id: tag
         run: echo "::set-output name=tag-name::$(tag=$(sed -n '/^version:/p' charts/Chart.yaml))"
 
-      - uses: actions/checkout@v3
-      - uses: rickstaa/action-create-tag@v1
-        with:
-          tag: "${{ steps.tag.outputs.tag-name }}"
+      - name: Get TAG Value
+        run: echo "${{ steps.tag.outputs.tag-name }}"
+
 
