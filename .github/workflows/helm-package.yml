@@ -38,10 +38,13 @@ jobs:
       - name: S3 package push
         run: |
           file=$(ls | grep .tgz)
-          tag=$(sed -n '/^version:/p' charts/Chart.yaml)
-          echo $file
           helm s3 push $file main-chart
       
-      - name: Echo tes
-        run: echo $tag
+      - name: Define TAG
+        id: tag
+        run: tag=$(sed -n '/^version:/p' charts/Chart.yaml)
+
+      - uses: rickstaa/action-create-tag@v1
+        with:
+          tag: ${{ steps.tag }}
 
