@@ -41,8 +41,6 @@ jobs:
           tag=$(sed -n '/^version:/p' charts/Chart.yaml)
           helm s3 push $file main-chart
       
-      
-      - uses: actions/checkout@v3
       - uses: rickstaa/action-create-tag@v1
         with:
           tag: "$tag"
