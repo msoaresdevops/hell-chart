@@ -41,8 +41,6 @@ jobs:
           tag=$(sed -n '/^version:/p' charts/Chart.yaml)
           helm s3 push $file main-chart
       
-      - uses: rickstaa/action-create-tag@v1
+      - name: Echo tes
         run: echo $tag
-        with:
-          tag: $tag
 
