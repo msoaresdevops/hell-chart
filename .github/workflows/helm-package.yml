@@ -38,7 +38,7 @@ jobs:
       - name: S3 package push
         run: |
           file=$(ls | grep .tgz)
-          tag=$(sed -n '/^version:/p' Chart.yaml)
+          tag=$(sed -n '/^version:/p' charts/Chart.yaml)
           helm s3 push $file main-chart
       
       
