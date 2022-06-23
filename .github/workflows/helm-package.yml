@@ -39,6 +39,7 @@ jobs:
         run: |
           file=$(ls | grep .tgz)
           tag=$(sed -n '/^version:/p' charts/Chart.yaml)
+          echo $file
           helm s3 push $file main-chart
       
       - name: Echo tes
